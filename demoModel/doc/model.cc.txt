@@ -1,0 +1,77 @@
+//
+//                                 Scene
+//          +------------------| mRootNode   |
+//          |                  | mMeshes[]   |----------------------+
+//          |               +->| mMaterials[]|------+               |
+//          V               |                       |               |
+//		 Root Node          |                       V               V
+//  +--| mChildren[]|       |                    Material          Mesh
+//  |  | mMeshes[]  |       |                   GetTexture    | mVertices     |
+//  |                       |                                 | mNormals      |
+//  +--------------+        |                                 | mTextureCoords|
+//  |              |        |                                 | mFaces        |-->Face::mindices[]
+//  V              V        +---------------------------------| mMaterialIndex|
+//Child node   Child Node
+//           |mChildren[] |
+//           | mMeshes[]  |
+
+#include"model.hpp"
+
+model::model(const char* filePath)
+{
+	loadModelFromfile(const char* filePath);
+}
+
+bool model::Draw(Shader* shader)
+{
+	for(int i=0;i<meshes.size();i++)
+	{
+		meshes[i].Draw(shader);
+	}
+
+	return true;
+}
+
+bool inline loadModelFromfile(const std::string& filePath)
+{
+	Assimp::Importer fileImporter;
+	const aiScene* scene = fileImporter.ReadFile(filePath,aiProcess_Triangulate | aiProcess_FlipUVs);
+	if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+	{
+		cout<<"#ERROR: assimp readfile error>>"<<fileImporter.GetErrorString()<<endl;
+		return -1;
+	}
+	processNode(scene->mRootNode,scene);
+	return true;
+}
+
+void processNode(aiNode* node,const aiScene* scene)
+{
+	for(int i=0;i < node->mNumMeshes;i++)
+	{
+		aiMesh* mesh =scene->mMeshes[node->mMeshes[i]];
+		meshes.push_back(processMesh(mesh,scene));
+		//
+	}
+	for(int i=0;i < node->mNumChildren;i++)
+	{
+		processNode(node->mChildren[i],scene);
+	}
+}
+
+Mesh processMesh(aiMesh* mesh,const aiScene* scene)
+{
+	for(int i=0;i < mesh->mNumVertices;i++)
+	{
+		
+	}
+}
+
+
+
+
+
+
+
+
+
